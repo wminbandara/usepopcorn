@@ -56,6 +56,7 @@ export default function App() {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const query = "matrix";
 
   /*
@@ -69,14 +70,24 @@ export default function App() {
 
   useEffect(function () {
     async function fetchMovies() {
-      setIsLoading(true);
-      const res = await fetch(
-        `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
-      );
-      const data = await res.json();
-      setMovies(data.Search);
-      //console.log(data.Search);
-      setIsLoading(false);
+      try {
+        setIsLoading(true);
+        const res = await fetch(
+          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+        );
+
+        if (!res.ok)
+          throw new Error("Something went wrong with fetching movies");
+
+        const data = await res.json();
+        setMovies(data.Search);
+        //console.log(data.Search);
+        setIsLoading(false);
+      } catch (error) {
+        console.error(error.message);
+        setError(error.message);
+        setIsLoading(false);
+      }
     }
     fetchMovies();
   }, []);
